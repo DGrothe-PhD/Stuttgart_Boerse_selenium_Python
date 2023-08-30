@@ -1,4 +1,4 @@
-
+import os
 import msvcrt
 import time
 import csv
@@ -8,6 +8,7 @@ import random
 import xlsxwriter
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.action_chains import ActionChains
@@ -21,19 +22,23 @@ from selenium.common.exceptions import  TimeoutException
 import contextlib
 from selenium.webdriver import Remote
 from selenium.webdriver.support.expected_conditions import staleness_of
-from POMProjectFolder.Stuttgart.Pages.locators import Locators
+#from POMProjectFolder.Stuttgart.Pages.locators import Locators
+from locators import Locators
 
 chrome_options = Options()
 chrome_options.add_experimental_option("prefs", {
   "download.default_directory": "/path/to/download/dir",
   "download.prompt_for_download": False,
 })
+#active_userprofile = os.environ['USERPROFILE']
+#chromedriver_location = active_userprofile+"\\Documents\\programs\\chromedriver.exe"
 chromedriver_location = "C:\\Users\\lenzre\\Documents\\programs\\chromedriver.exe"
+service = Service(executable_path = chromedriver_location)
 chrome_options.add_argument("--disable-gpu")#OLDER OPTIONS
 chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])#OLDER OPTIONS
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--remote-debugging-port=9222")
-driver = webdriver.Chrome(chromedriver_location, options=chrome_options)
+driver = webdriver.Chrome(service = service, options=chrome_options)
 
 driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
 params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': "/path/to/download/dir"}}
@@ -43,7 +48,7 @@ command_result = driver.execute("send_command", params)
 #USED 5
 def click_operation_id_A(fname):
     try:
-        element=driver.find_element_by_id ( fname)
+        element=driver.find_element(By.ID, fname)
         driver.execute_script("arguments[0].click();", element)
     except NoSuchElementException as exception:
         print ('Click on ' +  fname + '  ID A not successful')
@@ -65,7 +70,7 @@ def click_operation_B_Xpath(fname):
     WebDriverWait(driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
     try:
         element=WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, fname))).click()
-        driver.find_element_by_xpath(fname).sendKeys('\uE035')
+        driver.find_element("xpath", fname).sendKeys('\uE035')
     except NoSuchElementException as exception:
         print ('Click on ' + fname+ ' B XPath  not successful')
     except TimeoutException:
@@ -76,7 +81,7 @@ def click_operation_css(fname):
     WebDriverWait(driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
     global A
     try:
-        element= driver.find_element_by_css_selector(fname)
+        element= driver.find_element(By.CSS_SELECTOR, fname)
         driver.execute_script("arguments[0].click();", element)
         A=True
     except NoSuchElementException as exception:
@@ -89,7 +94,7 @@ def write_operation_xpath(fname, Input):
     WebDriverWait(driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
     global A
     try:
-        driver.find_element_by_xpath(fname).send_keys(Input)
+        driver.find_element("xpath", fname).send_keys(Input)
     except NoSuchElementException as exception:
         print ('Writing '+ Input + ' not successful with xpath celector')
         A=False
@@ -102,7 +107,7 @@ def write_operation_b_xpath(fname, Input):
     global A
     try:
         element=WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.XPATH, fname))).send_keys(Input)
-        #driver.find_element_by_xpath(fname).send_keys(Input)
+        #driver.find_element("xpath", fname).send_keys(Input)
     except NoSuchElementException as exception:
         print ('Writing '+ Input + ' not successful with xpath celector')
         A=False
@@ -159,7 +164,7 @@ click_operation_css(Locators.Zusatzliche_Filter_css)
 WebDriverWait(driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
 write_operation_b_xpath(Locators.Zusatzliche_Filter_Textfield_Full_XPath,"Gelist")
 time.sleep(random.randint(2,6))
-#T‰ss‰ pit‰‰ olla Xpath
+#T√§ss√§ pit√§√§ olla Xpath
 click_operation_id_A(Locators.Gelisteter_Zeitraum_preselector_Button_id)
 click_operation_Xpath(Locators.Zusatzliche_Filter_Anwenden_Full_XPath)
 click_operation_Xpath(Locators.Gelisteter_Zeitraum_Button_xp)
@@ -221,6 +226,7 @@ for tr in table_rows:
     tables.append(row)
 print(tables)
 df = pd.DataFrame(tables)
-df.to_excel(excel_writer = "c:\\temp\Lib\POMProjectFolder\Stuttgart\Test\\test.xlsx")
+df.to_excel(excel_writer = "c:\\temp\Lib\POMProjectFolder\Stuttgart\\Test\\test.xlsx")
+#df.to_excel(excel_writer = "c:\\temp\\Stuttgart_test.xlsx")
 
 
