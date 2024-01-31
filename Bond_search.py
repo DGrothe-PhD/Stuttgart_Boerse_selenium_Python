@@ -1,4 +1,4 @@
-import config_webdriver_manager
+import config
 import web_actions
 import os
 #import msvcrt
