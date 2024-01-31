@@ -87,6 +87,17 @@ def write_operation_xpath(fname, Input):
     except TimeoutException:
         pass
 
+# for writing the results to Excel
+def df_to_excel(df, ws, header=True, index=True, startrow=0, startcol=0):
+    """Write DataFrame df to openpyxl worksheet ws"""
+
+    rows = dataframe_to_rows(df, header=header, index=index)
+
+    for r_idx, row in enumerate(rows, startrow + 1):
+        for c_idx, value in enumerate(row, startcol + 1):
+             ws.cell(row=r_idx, column=c_idx).value = value
+
+
 #RELAX
 def relax():
     WebDriverWait(config.driver, 10).until(lambda d: d.execute_script('return document.readyState') == 'complete')
