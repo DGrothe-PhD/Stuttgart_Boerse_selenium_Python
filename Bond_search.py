@@ -1,5 +1,5 @@
 import config_webdriver_manager
-import web_actions_webd
+import web_actions
 import os
 #import msvcrt
 import time
